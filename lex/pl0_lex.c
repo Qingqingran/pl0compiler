@@ -36,7 +36,7 @@ int char_type_judge(char t){
         return 2;
     if(t == '_')
         return 3;
-    if(t == ' ' || t == '\t')
+    if(t == ' ' || t == '\t' || t == '\r')
         return 4;
     if(t == '/')
         return 5;
@@ -339,6 +339,7 @@ BOOL PL0Lex_get_token(PL0Lex * lex)
     char token[11];
     int state = 0;
     int num_long = 0;
+    int char_long = 0;
     int t_num = 0;
     lex->line_begin = 0;
     lex->line_end = 0;
@@ -349,7 +350,8 @@ BOOL PL0Lex_get_token(PL0Lex * lex)
         while(1){
             if(state == 0){
                 t_num = 0;
-                // memset(token, 0, sizeof(token));
+                num_long = 0;;
+                char_long = 0;
                 lex->line_begin = char_count;
                 lex->line_end = char_count;
                 lex->line_end++;
@@ -371,6 +373,12 @@ BOOL PL0Lex_get_token(PL0Lex * lex)
                     else
                         return FALSE;
                 }
+                if(state == 2){
+                    if(char_long < MAX_ID_LEN)
+                        char_long ++;
+                    else
+                        return FALSE;
+                }
                 if((c = getc(fin)) != EOF){
                     char_count++;
                     state = station(c,state);
@@ -378,14 +386,19 @@ BOOL PL0Lex_get_token(PL0Lex * lex)
             }
             else if(state == 4){
                 state = 0;
-                if((c = getc(fin)) != EOF){
-                    l_num++;
-                    char_count = 0;
-                    lex->line_begin = char_count;
-                    t_num = 0;
+                l_num++;
+                char_count = 0;
+                lex->line_begin = char_count;
+                t_num = 0;
+                num_long = 0;
+                char_long = 0;
+                if((c = getc(fin)) != EOF)
                     state = station(c,state);
+                else if((c = getc(fin)) == EOF){
+                    memset(token, '\0', sizeof(token));
+                    //token[0] = '\0';
+                    break;
                 }
-                // break;
             }
             else if(state == 5){
                 // token[t_num] = '\0';
@@ -442,6 +455,8 @@ BOOL PL0Lex_get_token(PL0Lex * lex)
             else if(state == 12){
                 memset(token, 0, sizeof(token));
                 t_num = 0;
+                num_long = 0;
+                char_long = 0;
                 state = 0;
                 if((c = getc(fin)) != EOF){
                     char_count++;
@@ -458,6 +473,8 @@ BOOL PL0Lex_get_token(PL0Lex * lex)
                     char_count++;
                     lex->line_begin = char_count;
                     t_num = 0;
+                    num_long = 0;
+                    char_long = 0;
                     state = station(c, state);
                 }
             }

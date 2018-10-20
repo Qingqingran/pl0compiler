@@ -20,15 +20,17 @@ int main()
 	{
 		show_help(argv[0]);
 		exit(-1);
-	}*/
-	char filename[100];
-    scanf("%s",filename);
-	fin = fopen(filename, "rb");
-	/*if (!fin)
+	}
+
+	fin = fopen(argv[1], "rb");
+	if (!fin)
 	{
 		printf("Fatal: Cannot open file for reading: %s\n", argv[1]);
 		exit(-1);
 	}*/
+	char filename[100];
+    scanf("%s",filename);
+	fin = fopen(filename, "rb");
     if (!fin)
     {
         printf("Fatal: Cannot open file for reading:\n");
@@ -51,22 +53,20 @@ int main()
 		assert(lex->last_token_type != TOKEN_SYMBOL);
 		if (lex->last_token_type == TOKEN_IDENTIFIER)
 		{
-			printf("Identifier: %s\n", lex->last_id);
+			printf("Identifier:    %-9s  %d : %d - %d\n", lex->last_id, lex->line_num, lex->line_begin, lex->line_end);
 		}
 		else if (lex->last_token_type == TOKEN_NUMBER)
 		{
-			printf("Number: %d\n", lex->last_num);
+			printf("Number:        %-9d  %d : %d - %d\n", lex->last_num, lex->line_num, lex->line_begin, lex->line_end);
 		}
 		else if (lex->last_token_type > TOKEN_RESWORDS)
 		{
-			printf("Reserved word: %s\n", TOKEN_RESERVED_WORDS[lex->last_token_type - TOKEN_RESWORDS - 1]);
+			printf("Reserved word: %-9s  %d : %d - %d\n", TOKEN_RESERVED_WORDS[lex->last_token_type - TOKEN_RESWORDS - 1], lex->line_num, lex->line_begin, lex->line_end);
 		}
 		else
 		{
-			printf("Symbol: %s\n", TOKEN_SYMBOLS[lex->last_token_type - TOKEN_SYMBOL - 1]);
+			printf("Symbol:        %-9s  %d : %d - %d\n", TOKEN_SYMBOLS[lex->last_token_type - TOKEN_SYMBOL - 1], lex->line_num, lex->line_begin, lex->line_end);
 		}
-		printf("The line number:%d, the begin position:%d, the end position:%d\n", lex->line_num, lex->line_begin, lex->line_end);
-
 	}
 
 	printf("--- Lexical Analysis testing end. ---\n");
