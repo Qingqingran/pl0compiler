@@ -297,6 +297,9 @@ int station(char c, int state){
                 case '/':
                     state = 13;
                     break;
+                case '*':
+                    state = 7;
+                    break;
                 default:
                     state = 6;
                     break;
@@ -370,14 +373,19 @@ BOOL PL0Lex_get_token(PL0Lex * lex)
                 if(state == 1){
                     if(num_long < MAX_NUM_LEN)
                         num_long ++;
-                    else
+                    else{
+                        printf("Overflow of interger.\n");
                         return FALSE;
+                    }
                 }
+                // 判断字母长度是否符合要求
                 if(state == 2){
                     if(char_long < MAX_ID_LEN)
                         char_long ++;
-                    else
+                    else{
+                        printf("Overflow of identifier.\n");
                         return FALSE;
+                    }
                 }
                 if((c = getc(fin)) != EOF){
                     char_count++;
@@ -396,12 +404,10 @@ BOOL PL0Lex_get_token(PL0Lex * lex)
                     state = station(c,state);
                 else if((c = getc(fin)) == EOF){
                     memset(token, '\0', sizeof(token));
-                    //token[0] = '\0';
                     break;
                 }
             }
             else if(state == 5){
-                // token[t_num] = '\0';
                 memset(token, 0, sizeof(token));
                 if((c = getc(fin)) != EOF)
                     state = station(c,state);
@@ -410,15 +416,24 @@ BOOL PL0Lex_get_token(PL0Lex * lex)
             }
             else if(state == 6){
                 memset(token, 0, sizeof(token));
-                if((c = getc(fin)) != EOF)
+                if((c = getc(fin)) != EOF){
                     char_count++;
                     state = station(c,state);
+                }
+                else if((c = getc(fin)) == EOF){
+                    printf("The file is end with invalid comment.\n");
+                    return FALSE;
+                }
             }
             else if(state == 7){
                 memset(token, 0, sizeof(token));
                 if((c = getc(fin)) != EOF){
                     char_count++;
                     state = station(c,state);
+                }
+                else if((c = getc(fin)) == EOF){
+                    printf("The file is end with invalid comments.\n");
+                    return FALSE;
                 }
             }
             else if(state == 8){
@@ -461,9 +476,6 @@ BOOL PL0Lex_get_token(PL0Lex * lex)
                 if((c = getc(fin)) != EOF){
                     char_count++;
                     lex->line_begin = char_count;
-                    //lex->line_end = char_count;
-                    //lex->line_end++;
-                    //token[t_num++] = c;
                     state = station(c,state);
                 }
             }
